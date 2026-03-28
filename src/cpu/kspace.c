@@ -1,9 +1,9 @@
-/* cpu/utils.c */
+/* src/cpu/kspace.c */
 
 #include <stdlib.h>
 
+#include "kspace.h"
 #include "hdf5.h"
-#include "types.h"
 
 KSpace* read_kspace(const char *h5file)
 {
@@ -71,4 +71,3 @@ exit:
 
     return kspace;
 }
-

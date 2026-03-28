@@ -29,10 +29,11 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 .
 ├── src/
 │   ├── cpu/
+│   │   ├── complex.h
+│   │   ├── kspace.h
+│   │   ├── matrix.h
 │   │   ├── nufft.c          # CPU NUFFT approximation
-│   │   ├── solver.c         # CPU conjugate gradient solver
-│   │   ├── types.c          # Types needed for computation such as complex numbers, etc.
-│   │   └── utils.c          # k-space I/O, image utilities
+│   │   └── solver.c         # CPU conjugate gradient solver
 │   ├── cuda/
 │   │   ├── nufft.cu         # CUDA NUFFT kernels
 │   │   ├── solver.cu        # CUDA CG solver
@@ -42,10 +43,11 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 │   │       └── fft_opt.cu   # cuFFT-based optimizations
 │   └── main.c               # Entry point
 ├── include/
+│   ├── complex.h
+│   ├── kspace.h
+│   ├── matrix.h
 │   ├── nufft.h
-│   ├── solver.h
-│   ├── types.h 
-│   └── utils.h
+│   └── solver.h
 ├── data/                    # k-space input data (not tracked)
 ├── results/                 # Reconstruction outputs and benchmarks
 ├── tests/

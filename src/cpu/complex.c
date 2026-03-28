@@ -1,6 +1,6 @@
-/* cpu/types.c */
+/* src/cpu/complex.c */
 
-#include "types.h"
+#include "complex.h"
 
 /* (a + ib) + (c + id) = (a + c) + i(b + d) */
 Complex complex_add(Complex a, Complex b)
