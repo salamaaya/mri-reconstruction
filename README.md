@@ -71,6 +71,8 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 ## Build
 
 ```bash
+mkdir build
+
 # CPU baseline only
 make cpu
 
@@ -90,16 +92,16 @@ make all
 
 ```bash
 # Run CPU baseline reconstruction
-./mri_recon --mode cpu --input data/kspace.bin --output results/recon_cpu.bin
+./build/mri_recon --mode cpu --input data/kspace.bin --output results/recon_cpu.bin
 
 # Run naive GPU reconstruction
-./mri_recon --mode gpu --input data/kspace.bin --output results/recon_gpu.bin
+./build/mri_recon --mode gpu --input data/kspace.bin --output results/recon_gpu.bin
 
 # Run optimized GPU reconstruction
-./mri_recon --mode gpu_opt --input data/kspace.bin --output results/recon_opt.bin
+./build/mri_recon --mode gpu_opt --input data/kspace.bin --output results/recon_opt.bin
 
 # Run benchmark (all three modes, prints speedup table)
-./mri_recon --benchmark --input data/kspace.bin
+./build/mri_recon --benchmark --input data/kspace.bin
 ```
 
 ---
