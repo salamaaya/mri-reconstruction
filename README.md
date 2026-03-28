@@ -61,11 +61,11 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 
 | Dependency | Purpose | Installation |
 |---|---| --- |
-| CUDA Toolkit ≥ 11.0 | GPU kernels and cuFFT |
-| GCC ≥ 9.0 | CPU baseline compilation |
-| cuFFT | Optimized FFT on GPU |
+| CUDA Toolkit ≥ 11.0 | GPU kernels and cuFFT ||
+| GCC ≥ 9.0 | CPU baseline compilation | `sudo dnf install gcc` |
+| cuFFT | Optimized FFT on GPU ||
 | libhdf5 | Reading fastMRI `.h5` files | `sudo dnf install hdf5-devel.x86_64` |
-| [fastMRI](https://fastmri.med.nyu.edu/) | MRI k-space datasets |
+| [fastMRI](https://fastmri.med.nyu.edu/) | MRI k-space datasets | by request |
 
 ---
 
