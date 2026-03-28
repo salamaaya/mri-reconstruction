@@ -59,11 +59,12 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 
 ## Dependencies
 
-| Dependency | Purpose |
-|---|---|
+| Dependency | Purpose | Installation |
+|---|---| --- |
 | CUDA Toolkit ≥ 11.0 | GPU kernels and cuFFT |
 | GCC ≥ 9.0 | CPU baseline compilation |
 | cuFFT | Optimized FFT on GPU |
+| libhdf5 | Reading fastMRI `.h5` files | `sudo dnf install hdf5-devel.x86_64` |
 | [fastMRI](https://fastmri.med.nyu.edu/) | MRI k-space datasets |
 
 ---
@@ -92,13 +93,13 @@ make all
 
 ```bash
 # Run CPU baseline reconstruction
-./build/mri_recon --mode cpu --input data/kspace.bin --output results/recon_cpu.bin
+./build/mri_recon --mode cpu --input data/kspace.bin --output results/recon_cpu.bin [*.h5]
 
 # Run naive GPU reconstruction
-./build/mri_recon --mode gpu --input data/kspace.bin --output results/recon_gpu.bin
+./build/mri_recon --mode gpu --input data/kspace.bin --output results/recon_gpu.bin [*.h5]
 
 # Run optimized GPU reconstruction
-./build/mri_recon --mode gpu_opt --input data/kspace.bin --output results/recon_opt.bin
+./build/mri_recon --mode gpu_opt --input data/kspace.bin --output results/recon_opt.bin [*.h5]
 
 # Run benchmark (all three modes, prints speedup table)
 ./build/mri_recon --benchmark --input data/kspace.bin
