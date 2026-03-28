@@ -134,3 +134,4 @@ Baseline theoretical speedup estimate (Amdahl's Law, 95% parallel fraction, N=10
 2. [NVIDIA GPU Gems 2 – Chapter 48: Medical Image Reconstruction](https://developer.nvidia.com/gpugems/gpugems2/part-vi-simulation-and-numerical-algorithms/chapter-48-medical-image-reconstruction)
 3. [fastMRI Dataset – NYU](https://fastmri.med.nyu.edu/)
 4. Ramzi et al. (2022). NC-PDNet: A Density-Compensated Unrolled Network for 2D and 3D Non-Cartesian MRI Reconstruction. *IEEE Transactions on Medical Imaging*, 41(7), 1625–1638.
+5. https://akrause2014.github.io/HDF5-Basics/c/html/#viewing-the-contents-of-an-hdf5-file

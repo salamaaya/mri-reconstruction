@@ -17,20 +17,21 @@ OUT_DIR	= build
 all: cpu cuda cuda_opt
 
 cpu:
-	$(CC) $(CFLAGS) $(CPU_SRCS) -o $(OUT_DIR)/mri_recon_cpu -lm
+	$(CC) $(CFLAGS) $(CPU_SRCS) -o $(OUT_DIR)/mri_recon_cpu -lm -lhdf5
 
 cuda:
-	$(NVCC) $(NVFLAGS) $(CPU_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu -lcufft -lm
+	$(NVCC) $(NVFLAGS) $(CPU_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu -lcufft -lm -lhdf5
 
 cuda_opt:
 	$(NVCC) $(NVFLAGS) -DOPTIMIZED $(CPU_SRCS) $(CUDA_SRCS) $(OPT_SRCS) \
-	    -o $(OUT_DIR)/mri_recon_opt -lcufft -lm
+	    -o $(OUT_DIR)/mri_recon_opt -lcufft -lm -lhdf5
 
 debug_cpu:
-	$(CC) $(CFLAGS_DBG) $(CPU_SRCS) -o $(OUT_DIR)/mri_recon_cpu_dbg -lm
+	$(CC) $(CFLAGS_DBG) $(CPU_SRCS) -o $(OUT_DIR)/mri_recon_cpu_dbg -lm -lhdf5
 
 debug_cuda:
-	$(NVCC) $(NVFLAGS_DBG) $(CPU_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu_dbg -lcufft -lm
+	$(NVCC) $(NVFLAGS_DBG) $(CPU_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu_dbg -lcufft \
+		-lm -lhdf5
 
 clean:
 	rm -f mri_recon_cpu mri_recon_gpu mri_recon_opt

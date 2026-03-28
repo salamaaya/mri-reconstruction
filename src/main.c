@@ -1,34 +1,33 @@
 /* main.c */
 
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "types.h"
+#include "utils.h"
 
 int main(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
-    Complex a = {3, 2};
-    Complex b = {3, -2};
+    if (argc != 2) {
+        fprintf(stderr, "usage: mri_recon [*.h5]\n");
+        return EXIT_FAILURE;
+    }
 
-    Complex sum = complex_add(a, b);
-    Complex prod = complex_mul(a, b);
-    Complex conj = complex_conj(a);
-    float abs2 = complex_abs2(a);
+    char *h5file = argv[1];
+    KSpace *kspace = read_kspace(h5file);
+    if (kspace == NULL) {
+        fprintf(stderr, "failed to read kspace data.\n");
+        return EXIT_FAILURE;
+    }
 
-    printf("Added (%lf + %lfi) + (%lf + %lfi) = (%lf + %lfi)\n",
-            a.real, a.imaginary, b.real, b.imaginary,
-            sum.real, sum.imaginary);
+    printf("kspace dimensions: %d slices x %d rows x %d cols\n",
+           kspace->slices, kspace->rows, kspace->cols);
 
-    printf("Multiplied (%lf + %lfi) * (%lf + %lfi) = (%lf + %lfi)\n",
-            a.real, a.imaginary, b.real, b.imaginary,
-            prod.real, prod.imaginary);
+    int s = 0, r = 0, c = 25;
+    Complex sample = kspace->data[s * (kspace->rows * kspace->cols) + r * kspace->cols + c];
+    printf("kspace[%d][%d][%d] = %.6f + %.6fi\n", s, r, c, sample.real, sample.imaginary);
 
-    printf("Complex conjugate (%lf + %lfi) = (%lf + %lfi)\n",
-            a.real, a.imaginary, conj.real, conj.imaginary);
+    free(kspace->data);
+    free(kspace);
 
-    printf("Complex abs squared (%lf + %lfi) = %lf\n",
-            a.real, a.imaginary, abs2);
-
-    return 0;
+    return EXIT_SUCCESS;
 }
