@@ -1,19 +1,26 @@
 /* include/matrix.h */
+#ifndef MATRIX_H
+#define MATRIX_H
+
+#include "complex.h"
 
 typedef struct {
     int rows;
     int cols;
-    float *data;
+    Complex *data;
 } Matrix;
 
-Matrix* matrix_create(int, int);
+Matrix* matrix_construct(int, int);
 void    matrix_destroy(Matrix *);
 
-float   matrix_getat(Matrix *, int, int);
-int     matrix_setat(Matrix *, float, int, int);
+Complex matrix_getat(Matrix *, int, int);
+int     matrix_setat(Matrix *, Complex, int, int);
 
 Matrix* matrix_add(Matrix *, Matrix *);
-Matrix* matrix_mul(Matrix, Matrix);
-Matrix* matrix_transpose(Matrix, Matrix);
-Matrix* matrix_hermitian(Matrix, Matrix);
+Matrix* matrix_mul(Matrix *, Matrix *);
+Matrix* matrix_transpose(Matrix *);
+Matrix* matrix_hermitian(Matrix *);
 
+void    matrix_print(Matrix *);
+
+#endif /* MATRIX_H */

@@ -1,6 +1,7 @@
 /* src/cpu/complex.c */
 
 #include "complex.h"
+#include <stdio.h>
 
 /* (a + ib) + (c + id) = (a + c) + i(b + d) */
 Complex complex_add(Complex a, Complex b)
@@ -39,4 +40,9 @@ Complex complex_conj(Complex a)
 float complex_abs2(Complex a)
 {
     return a.real * a.real + a.imaginary * a.imaginary;
+}
+
+void complex_print(Complex c)
+{
+    printf("(%lf + i%lf)", c.real, c.imaginary);
 }
