@@ -14,7 +14,7 @@ OUT_DIR	= build
 SRC_CPU_DIR = src/cpu
 
 CPU_SRCS  = $(SRC_CPU_DIR)/nufft.c $(SRC_CPU_DIR)/solver.c src/main.c \
-			$(SRC_CPU_DIR)/complex.c $(SRC_CPU_DIR)/kspace.c $(SRC_CPU_DIR)/matrix.c
+			$(SRC_CPU_DIR)/complex.c $(SRC_CPU_DIR)/kspace.c $(SRC_CPU_DIR)/vector.c
 CUDA_SRCS = src/cuda/nufft.cu src/cuda/solver.cu src/cuda/kernels.cu
 OPT_SRCS  = src/cuda/optimized/nufft_opt.cu src/cuda/optimized/fft_opt.cu
 

@@ -31,7 +31,7 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 │   ├── cpu/
 │   │   ├── complex.h
 │   │   ├── kspace.h
-│   │   ├── matrix.h
+│   │   ├── vector.h
 │   │   ├── nufft.c          # CPU NUFFT approximation
 │   │   └── solver.c         # CPU conjugate gradient solver
 │   ├── cuda/
@@ -45,7 +45,7 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 ├── include/
 │   ├── complex.h
 │   ├── kspace.h
-│   ├── matrix.h
+│   ├── vector.h
 │   ├── nufft.h
 │   └── solver.h
 ├── data/                    # k-space input data (not tracked)
@@ -61,7 +61,7 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 
 ## Dependencies
 
-| Dependency | Purpose | Installation |
+| Dependency | Purpose | Example Installation |
 |---|---| --- |
 | CUDA Toolkit ≥ 11.0 | GPU kernels and cuFFT ||
 | GCC ≥ 9.0 | CPU baseline compilation | `sudo dnf install gcc` |
