@@ -1,4 +1,4 @@
-/* src/cpu/vector.c */
+/* src/cpu/solver.c */
 
 #include <math.h>
 #include <stdio.h>
