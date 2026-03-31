@@ -8,11 +8,10 @@
 #include "kspace.h"
 #include "solver.h"
 
-static int write_magnitude_volume(const char *path,
-                                  const float *data,
-                                  int slices,
-                                  int rows,
-                                  int cols)
+static int write_pgm_slice(const char *path,
+                           const float *data,
+                           int rows,
+                           int cols)
 {
     FILE *fp = fopen(path, "wb");
     if (!fp) {
@@ -20,18 +19,70 @@ static int write_magnitude_volume(const char *path,
         return -1;
     }
 
-    if (fprintf(fp, "MRI_RECON_MAG_V1\n%d %d %d\n", slices, rows, cols) < 0) {
+    if (fprintf(fp, "P5\n%d %d\n255\n", cols, rows) < 0) {
         fclose(fp);
         return -1;
     }
 
-    size_t count = (size_t)slices * (size_t)rows * (size_t)cols;
-    if (fwrite(data, sizeof(float), count, fp) != count) {
+    const int n = rows * cols;
+    float min_v = data[0];
+    float max_v = data[0];
+
+    for (int i = 1; i < n; i++) {
+        if (data[i] < min_v)
+            min_v = data[i];
+        if (data[i] > max_v)
+            max_v = data[i];
+    }
+
+    const float range = max_v - min_v;
+    unsigned char *pixels = (unsigned char *)malloc((size_t)n);
+    if (!pixels) {
         fclose(fp);
         return -1;
     }
 
+    for (int i = 0; i < n; i++) {
+        float norm = (range > 1e-12f) ? (data[i] - min_v) / range : 0.0f;
+        int val = (int)(norm * 255.0f + 0.5f);
+        if (val < 0) val = 0;
+        if (val > 255) val = 255;
+        pixels[i] = (unsigned char)val;
+    }
+
+    if (fwrite(pixels, 1, (size_t)n, fp) != (size_t)n) {
+        free(pixels);
+        fclose(fp);
+        return -1;
+    }
+
+    free(pixels);
     fclose(fp);
+    return 0;
+}
+
+static int write_pgm_volume(const char *prefix,
+                            const float *data,
+                            int slices,
+                            int rows,
+                            int cols)
+{
+    char path[512];
+    const int n = rows * cols;
+
+    for (int s = 0; s < slices; s++) {
+        if (slices == 1) {
+            if (snprintf(path, sizeof(path), "%s.pgm", prefix) >= (int)sizeof(path))
+                return -1;
+        } else {
+            if (snprintf(path, sizeof(path), "%s_slice_%03d.pgm", prefix, s) >= (int)sizeof(path))
+                return -1;
+        }
+
+        if (write_pgm_slice(path, &data[s * n], rows, cols) != 0)
+            return -1;
+    }
+
     return 0;
 }
 
@@ -53,12 +104,12 @@ static void build_cartesian_trajectory(int rows, int cols, float *kx, float *ky)
 int main(int argc, char **argv)
 {
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "usage: mri_recon [input.h5] [output.mag]\n");
+        fprintf(stderr, "usage: mri_recon [input.h5] [output_prefix]\n");
         return EXIT_FAILURE;
     }
 
     char *h5file = argv[1];
-    const char *output = (argc == 3) ? argv[2] : "recon_magnitude.mag";
+    const char *output_prefix = (argc == 3) ? argv[2] : "recon_magnitude";
 
     KSpace *kspace = kspace_construct(h5file);
 
@@ -117,8 +168,8 @@ int main(int argc, char **argv)
         printf("slice %d/%d reconstructed in %d CG iterations\n", s + 1, slices, iters);
     }
 
-    if (write_magnitude_volume(output, mag_volume, slices, rows, cols) != 0) {
-        fprintf(stderr, "Failed to write output volume: %s\n", output);
+    if (write_pgm_volume(output_prefix, mag_volume, slices, rows, cols) != 0) {
+        fprintf(stderr, "Failed to write PGM output with prefix: %s\n", output_prefix);
         free(kx);
         free(ky);
         free(rho);
@@ -127,7 +178,10 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    printf("wrote reconstructed magnitude volume: %s\n", output);
+    if (slices == 1)
+        printf("wrote reconstructed image: %s.pgm\n", output_prefix);
+    else
+        printf("wrote %d reconstructed slices: %s_slice_###.pgm\n", slices, output_prefix);
 
     free(kx);
     free(ky);
