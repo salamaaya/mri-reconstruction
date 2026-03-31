@@ -29,27 +29,27 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 .
 ├── src/
 │   ├── cpu/
-│   │   ├── complex.h
-│   │   ├── kspace.h
-│   │   ├── vector.h
-│   │   ├── nufft.c          # CPU NUFFT approximation
-│   │   └── solver.c         # CPU conjugate gradient solver
+│   │   ├── complex.c
+│   │   ├── kspace.c
+│   │   ├── vector.c
+│   │   ├── nufft.c
+│   │   └── solver.c 
 │   ├── cuda/
-│   │   ├── nufft.cu         # CUDA NUFFT kernels
-│   │   ├── solver.cu        # CUDA CG solver
-│   │   ├── kernels.cu       # Linear algebra kernels (matvec, dot, axpy)
+│   │   ├── nufft.cu
+│   │   ├── solver.cu
+│   │   ├── kernels.cu
 │   │   └── optimized/
-│   │       ├── nufft_opt.cu # Shared memory / tiled NUFFT
-│   │       └── fft_opt.cu   # cuFFT-based optimizations
-│   └── main.c               # Entry point
+│   │       ├── nufft_opt.cu
+│   │       └── fft_opt.cu
+│   └── main.c
 ├── include/
 │   ├── complex.h
 │   ├── kspace.h
 │   ├── vector.h
 │   ├── nufft.h
 │   └── solver.h
-├── data/                    # k-space input data (not tracked)
-├── results/                 # Reconstruction outputs and benchmarks
+├── data/
+├── results/
 ├── tests/
 │   ├── test_nufft.c
 │   └── test_solver.c
@@ -95,16 +95,10 @@ make all
 
 ```bash
 # Run CPU baseline reconstruction
-./build/mri_recon --mode cpu --input data/kspace.bin --output results/recon_cpu.bin [*.h5]
+./build/mri_recon_cpu [data/*.h5] [results/*]
 
 # Run naive GPU reconstruction
-./build/mri_recon --mode gpu --input data/kspace.bin --output results/recon_gpu.bin [*.h5]
-
-# Run optimized GPU reconstruction
-./build/mri_recon --mode gpu_opt --input data/kspace.bin --output results/recon_opt.bin [*.h5]
-
-# Run benchmark (all three modes, prints speedup table)
-./build/mri_recon --benchmark --input data/kspace.bin
+./build/mri_recon_cuda [data/*.h5] [results/*]
 ```
 
 ---

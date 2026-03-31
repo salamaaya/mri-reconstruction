@@ -7,9 +7,7 @@
 #include "hdf5.h"
 
 typedef struct {
-    int slices;
-    int rows;
-    int cols;
+    int slices, rows, cols;
     hid_t file_id, dataset_id, space_id;
     hid_t complex_t;
     hsize_t *dims, ndims;
