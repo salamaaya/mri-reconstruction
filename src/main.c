@@ -29,10 +29,8 @@ static int write_pgm_slice(const char *path,
     float max_v = data[0];
 
     for (int i = 1; i < n; i++) {
-        if (data[i] < min_v)
-            min_v = data[i];
-        if (data[i] > max_v)
-            max_v = data[i];
+        if (data[i] < min_v) min_v = data[i];
+        if (data[i] > max_v) max_v = data[i];
     }
 
     const float range = max_v - min_v;
