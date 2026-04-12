@@ -1,4 +1,4 @@
-/* src/cpu/solver.c */
+/* src/gpu/solver.cu */
 
 #include <math.h>
 #include <stdio.h>

@@ -53,3 +53,4 @@ debug_cuda:
 clean:
 	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_gpu $(OUT_DIR)/mri_recon_opt \
 			$(OUT_DIR)/mri_recon_cpu_dbg $(OUT_DIR)/mri_recon_gpu_dbg
+

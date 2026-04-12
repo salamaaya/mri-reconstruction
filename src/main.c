@@ -1,7 +1,8 @@
-/* main.c */
+/* src/main.c */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "complex.h"
@@ -134,6 +135,8 @@ int main(int argc, char **argv)
         kspace_destroy(kspace);
         return EXIT_FAILURE;
     }
+
+    memset(mag_volume, 0, sizeof(*mag_volume));
 
     build_cartesian_trajectory(rows, cols, kx, ky);
 

@@ -82,3 +82,11 @@ void nufft_adjoint(const Complex *samples, int m,
     }
 }
 
+void nufft(const Complex *img, int nx, int ny,
+                   const float *kx, const float *ky, int m,
+                   Complex *samples, Complex *out)
+{
+    nufft_forward(img, nx, ny, kx, ky, m, samples);
+    nufft_adjoint(samples, m, kx, ky, nx, ny, out);
+}
+
