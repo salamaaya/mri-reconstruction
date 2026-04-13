@@ -6,8 +6,11 @@
 #include <string.h>
 
 #include "nufft.h"
-#include "solver.h"
-#include "vector.h"
+
+extern "C" {
+  #include "solver.h"
+  #include "vector.h"
+}
 
 static int apply_normal_operator(const Complex *x,
                                  const float *kx,

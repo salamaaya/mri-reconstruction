@@ -2,17 +2,11 @@
 
 #include "complex.h"
 
-/* Row-major index helper for (x, y) image coordinates. */
-static inline int img_index(int y, int x, int nx)
-{
-    return y * nx + x;
-}
-
 /*
  * Forward NUFFT (image -> k-space samples).
  * img has size nx * ny, samples has size m.
  */
-__global__ void nufft_forward(const Complex *img, int nx, int ny,
+__global__ void nufft_forward_kernel(const Complex *img, int nx, int ny,
                               const float *kx, const float *ky, int m,
                               Complex *samples)
 {
@@ -34,7 +28,8 @@ __global__ void nufft_forward(const Complex *img, int nx, int ny,
             const float phase = two_pi * (kx[s] * xp + ky[s] * yp);
             const float c = cosf(phase);
             const float sgn_sin = -sinf(phase);
-            const Complex v = img[img_index(y, x, nx)];
+            const int img_index = y * nx + x;
+            const Complex v = img[img_index];
 
             sum_r += v.real * c - v.imaginary * sgn_sin;
             sum_i += v.real * sgn_sin + v.imaginary * c;
@@ -57,7 +52,7 @@ __global__ void nufft_adjoint_kernel(const Complex* samples, int m,
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     if (x >= nx || y >= ny) return;
 
-    const float two_pi   = 2.0f * CUDART_PI_F;
+    const float two_pi   = 2.0f * M_PI;
     const float norm     = 1.0f / sqrtf((float)(nx * ny));
     const float x_center = 0.5f * (float)(nx - 1);
     const float y_center = 0.5f * (float)(ny - 1);
