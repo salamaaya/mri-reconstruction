@@ -1,0 +1,3 @@
+- time the major portions of the solver.
+- experiment with different thresholds.
+

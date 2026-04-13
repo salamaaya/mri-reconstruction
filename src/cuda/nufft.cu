@@ -21,18 +21,18 @@ void nufft_adjoint(const Complex *samples, int m,
     Complex *samples_d, *out_d;
     float *kx_d, *ky_d;
 
-    int bytes_img     = nx * ny * sizeof(Complex);
+    int bytes_img = nx * ny * sizeof(Complex);
     int bytes_samples = m * sizeof(Complex);
-    int bytes_k       = m * sizeof(float);
+    int bytes_k = m * sizeof(float);
 
     cudaMalloc(&samples_d, bytes_samples);
-    cudaMalloc(&out_d,     bytes_img);
-    cudaMalloc(&kx_d,      bytes_k);
-    cudaMalloc(&ky_d,      bytes_k);
+    cudaMalloc(&out_d, bytes_img);
+    cudaMalloc(&kx_d, bytes_k);
+    cudaMalloc(&ky_d, bytes_k);
 
     cudaMemcpy(samples_d, samples, bytes_samples, cudaMemcpyHostToDevice);
-    cudaMemcpy(kx_d,      kx,      bytes_k,       cudaMemcpyHostToDevice);
-    cudaMemcpy(ky_d,      ky,      bytes_k,       cudaMemcpyHostToDevice);
+    cudaMemcpy(kx_d, kx, bytes_k, cudaMemcpyHostToDevice);
+    cudaMemcpy(ky_d, ky, bytes_k, cudaMemcpyHostToDevice);
     cudaMemset(out_d, 0, bytes_img);
 
     dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
