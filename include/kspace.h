@@ -18,4 +18,3 @@ KSpace* kspace_construct(const char *);
 void    kspace_destroy(KSpace *);
 
 #endif /* KSPACE_H */
-
