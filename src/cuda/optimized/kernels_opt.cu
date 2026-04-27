@@ -41,7 +41,7 @@ __global__ void nufft_forward_kernel(const Complex *img, int nx, int ny,
         if (load_idx < total_pixels) {
           sh_img[tid] = img[load_idx];
         } else {
-          sh_img[tid] = Complex(0.0f, 0.0f);
+          sh_img[tid] = { 0.0f, 0.0f };
         }
         __syncthreads();
 

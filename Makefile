@@ -66,7 +66,7 @@ debug_cpu:
 debug_cuda:
 	mkdir -p $(OUT_DIR)
 	$(NVCC) $(NVFLAGS_DBG) $(COMMON_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu_dbg \
-	    -lcufft $(HDF5_LINK) -lm
+	    $(HDF5_LINK) -lm
 
 clean:
 	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_cuda $(OUT_DIR)/mri_recon_cuda_opt \
