@@ -2,61 +2,96 @@
 
 #include "complex.h"
 
-/*
- * Forward NUFFT (image -> k-space samples).
- * img has size nx * ny, samples has size m.
- */
-__global__ void nufft_forward_kernel(const Complex *img, int nx, int ny,
-                              const float *kx, const float *ky, int m,
-                              Complex *samples)
-{
-    int s = blockIdx.x * blockDim.x + threadIdx.x;
-    if (s >= m) return;
+#define BLOCK_DIM_X 32
+#define BLOCK_DIM_Y 32
+#define BLOCK_SIZE (BLOCK_DIM_X * BLOCK_DIM_Y)
 
-    const float two_pi = 2.0f * (float)M_PI;
-    const float norm = 1.0f / sqrtf((float)(nx * ny));
+/* 
+* Forward NUFFT  (image → k-space samples)
+*
+* Tiling strategy:
+*   Each thread owns one sample 's' and must sum over every image pixel.
+*   All threads in the 1-D block share the same image tile, so we load
+*   BLOCK_SIZE pixels at a time into shared memory and let every thread
+*   iterate over the local copy instead of hitting global memory.
+**/
+__global__ void nufft_forward_kernel(const Complex *img, int nx, int ny,
+                                     const float *kx, const float *ky, int m,
+                                     Complex *samples)
+{
+    const int s   = blockIdx.x * blockDim.x + threadIdx.x;
+    const int tid = threadIdx.x;
+
+    __shared__ Complex sh_img[BLOCK_SIZE];
+
+    const float two_pi   = 2.0f * (float)M_PI;
+    const float norm     = 1.0f / sqrtf((float)(nx * ny));
     const float x_center = 0.5f * (float)(nx - 1);
     const float y_center = 0.5f * (float)(ny - 1);
 
-    float sum_r = 0.0f;
-    float sum_i = 0.0f;
+    const float kx_s = (s < m) ? kx[s] : 0.0f;
+    const float ky_s = (s < m) ? ky[s] : 0.0f;
 
-    __shared__ Complex img_shared[ny * nx];
-    img_shared[s] = img[s];
-    __syncthreads();
+    float sum_r = 0.0f, sum_i = 0.0f;
 
-    for (int y = 0; y < ny; y++) {
-        const float yp = (float)y - y_center;
-        for (int x = 0; x < nx; x++) {
-            const float xp = (float)x - x_center;
-            const float phase = two_pi * (kx[s] * xp + ky[s] * yp);
-            const float c = cosf(phase);
-            const float sgn_sin = -sinf(phase);
-            const int img_index = y * nx + x;
-            const Complex v = img_shared[img_index];
+    const int total_pixels = nx * ny;
 
-            sum_r += v.real * c - v.imaginary * sgn_sin;
-            sum_i += v.real * sgn_sin + v.imaginary * c;
+    for (int tile_start = 0; tile_start < total_pixels; tile_start += BLOCK_SIZE) {
+        const int load_idx = tile_start + tid;
+        if (load_idx < total_pixels) {
+          sh_img[tid] = img[load_idx];
+        } else {
+          sh_img[tid] = Complex(0.0f, 0.0f);
         }
+        __syncthreads();
+
+        const int tile_len = min(BLOCK_SIZE, total_pixels - tile_start);
+
+        for (int i = 0; i < tile_len; i++) {
+            const int pixel_idx = tile_start + i;
+            const float xp = (float)(pixel_idx % nx) - x_center;
+            const float yp = (float)(pixel_idx / nx) - y_center;
+
+            const float phase = two_pi * (kx_s * xp + ky_s * yp);
+            float sin_val, cos_val;
+            __sincosf(phase, &sin_val, &cos_val);
+            sin_val = -sin_val;
+
+            const Complex v = sh_img[i];
+            sum_r += v.real * cos_val - v.imaginary * sin_val;
+            sum_i += v.real * sin_val + v.imaginary * cos_val;
+        }
+
+        __syncthreads();
     }
 
-    samples[s].real      = norm * sum_r;
-    samples[s].imaginary = norm * sum_i;
+    if (s < m) {
+        samples[s].real      = norm * sum_r;
+        samples[s].imaginary = norm * sum_i;
+    }
 }
 
 /*
- * Adjoint NUFFT (k-space samples -> image).
- * samples has size m, img has size nx * ny.
- */
-__global__ void nufft_adjoint_kernel(const Complex* samples, int m,
-                                     const float* kx, const float* ky,
-                                     int nx, int ny, Complex* img)
+* Adjoint NUFFT  (k-space samples → image)
+*
+* Tiling strategy:
+*   Each thread owns one pixel (x,y) and must sum over every sample.
+*   All threads in the 2-D block read the same samples, so we stage
+*   BLOCK_SIZE (samples, kx, ky) triplets into shared memory per round.
+**/
+__global__ void nufft_adjoint_kernel(const Complex *samples, int m,
+                                     const float *kx, const float *ky,
+                                     int nx, int ny, Complex *img)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
-    if (x >= nx || y >= ny) return;
+    const int x   = blockIdx.x * blockDim.x + threadIdx.x;
+    const int y   = blockIdx.y * blockDim.y + threadIdx.y;
+    const int tid = threadIdx.y * blockDim.x + threadIdx.x;
 
-    const float two_pi   = 2.0f * M_PI;
+    __shared__ Complex sh_samples[BLOCK_SIZE];
+    __shared__ float   sh_kx[BLOCK_SIZE];
+    __shared__ float   sh_ky[BLOCK_SIZE];
+
+    const float two_pi   = 2.0f * (float)M_PI;
     const float norm     = 1.0f / sqrtf((float)(nx * ny));
     const float x_center = 0.5f * (float)(nx - 1);
     const float y_center = 0.5f * (float)(ny - 1);
@@ -64,24 +99,38 @@ __global__ void nufft_adjoint_kernel(const Complex* samples, int m,
     const float xp = (float)x - x_center;
     const float yp = (float)y - y_center;
 
-    float sum_r = 0.0f;
-    float sum_i = 0.0f;
+    float sum_r = 0.0f, sum_i = 0.0f;
 
-    const int out_idx = y * nx + x;
-    __shared__ Complex samples_shared[m];
-    samples_shared[out_idx] = samples[out_idx];
-    __syncthreads();
+    for (int tile_start = 0; tile_start < m; tile_start += BLOCK_SIZE) {
+        const int load_idx = tile_start + tid;
+        if (load_idx < m) {
+            sh_samples[tid] = samples[load_idx];
+            sh_kx[tid]      = kx[load_idx];
+            sh_ky[tid]      = ky[load_idx];
+        } else {
+            sh_samples[tid] = Complex{0.0f, 0.0f};
+            sh_kx[tid]      = 0.0f;
+            sh_ky[tid]      = 0.0f;
+        }
+        __syncthreads();
 
-    for (int s = 0; s < m; s++) {
-        const float phase = two_pi * (kx[s] * xp + ky[s] * yp);
-        const float c = cosf(phase);
-        const float sgn_sin = sinf(phase);
-        const Complex v = samples_shared[s];
-        sum_r += v.real * c - v.imaginary * sgn_sin;
-        sum_i += v.real * sgn_sin + v.imaginary * c;
+        const int tile_len = min(BLOCK_SIZE, m - tile_start);
+
+        for (int i = 0; i < tile_len; i++) {
+            const float phase = two_pi * (sh_kx[i] * xp + sh_ky[i] * yp);
+            float sin_val, cos_val;
+            __sincosf(phase, &sin_val, &cos_val);
+
+            const Complex v = sh_samples[i];
+            sum_r += v.real * cos_val - v.imaginary * sin_val;
+            sum_i += v.real * sin_val + v.imaginary * cos_val;
+        }
+
+        __syncthreads();
     }
 
-    img[out_idx].real      = norm * sum_r;
-    img[out_idx].imaginary = norm * sum_i;
+    if (x < nx && y < ny) {
+        img[y * nx + x].real      = norm * sum_r;
+        img[y * nx + x].imaginary = norm * sum_i;
+    }
 }
-

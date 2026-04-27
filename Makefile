@@ -1,7 +1,7 @@
 CC      = gcc
 NVCC    = nvcc
 CFLAGS  = -O2 -march=native -Wall -Iinclude
-NVFLAGS = -O2 -Iinclude
+NVFLAGS = -O2 -Iinclude -arch=sm_75
 
 HDF5_CFLAGS := $(shell pkg-config --cflags hdf5 2>/dev/null)
 HDF5_LIBS   := $(shell pkg-config --libs hdf5 2>/dev/null)
@@ -32,8 +32,9 @@ CUDA_SRCS = src/cuda/nufft.cu \
             src/cuda/kernels.cu
 
 # Optimized CUDA sources
-OPT_SRCS  = src/cuda/optimized/nufft_opt.cu \
-             src/cuda/optimized/fft_opt.cu
+CUDA_OPT_SRCS =	src/cuda/optimized/nufft_opt.cu \
+		src/cuda/optimized/kernels_opt.cu \
+		src/cuda/solver.cu
 
 CFLAGS_DBG  = -g3 -O0 -Wall -Wextra -Iinclude -DDEBUG
 NVFLAGS_DBG = -g -G -O0 -arch=sm_86 -Iinclude -lineinfo
@@ -51,12 +52,12 @@ cpu:
 
 cuda:
 	mkdir -p $(OUT_DIR)
-	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu -lcufft $(HDF5_LINK) -lm
+	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_cuda $(HDF5_LINK) -lm
 
 cuda_opt:
 	mkdir -p $(OUT_DIR)
-	$(NVCC) $(NVFLAGS) -DOPTIMIZED $(COMMON_SRCS) $(CUDA_SRCS) $(OPT_SRCS) \
-	    -o $(OUT_DIR)/mri_recon_opt -lcufft $(HDF5_LINK) -lm
+	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_OPT_SRCS) \
+	-o $(OUT_DIR)/mri_recon_cuda_opt $(HDF5_LINK) -lm
 
 debug_cpu:
 	mkdir -p $(OUT_DIR)
@@ -68,5 +69,5 @@ debug_cuda:
 	    -lcufft $(HDF5_LINK) -lm
 
 clean:
-	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_gpu $(OUT_DIR)/mri_recon_opt \
+	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_cuda $(OUT_DIR)/mri_recon_cuda_opt \
 	      $(OUT_DIR)/mri_recon_cpu_dbg $(OUT_DIR)/mri_recon_gpu_dbg
