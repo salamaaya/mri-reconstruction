@@ -1,3 +1,9 @@
-- time the major portions of the solver.
-- experiment with different thresholds.
+- time the major portions of the solver
+- experiment with different thresholds
+- optimize using shared memory
+- optimize using constant memory
+- optimize using cufft
+- setup experiment to test all different kinds of things
+    and write the results nicely to an excel sheet or something
+- launch kernel within a kernel
 

@@ -40,7 +40,7 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 │   │   ├── kernels.cu
 │   │   └── optimized/
 │   │       ├── nufft_opt.cu
-│   │       └── fft_opt.cu
+│   │       └── kernels_opt.cu
 │   └── main.c
 ├── include/
 │   ├── complex.h

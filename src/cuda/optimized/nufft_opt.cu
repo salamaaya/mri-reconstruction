@@ -1,4 +1,4 @@
-/* src/cuda/nufft.cu */
+/* src/cuda/optimized/nufft_opt.cu */
 
 #include "complex.h"
 #include "nufft.h"
