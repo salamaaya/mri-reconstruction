@@ -50,9 +50,8 @@ The iterative solver (Conjugate Gradient) is applied to find `ρ`. The bulk of c
 │   └── solver.h
 ├── data/
 ├── results/
-├── tests/
-│   ├── test_nufft.c
-│   └── test_solver.c
+├── experiment/
+│   └── experiment.py
 ├── Makefile
 └── README.md
 ```
