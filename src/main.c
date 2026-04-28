@@ -9,6 +9,8 @@
 #include "kspace.h"
 #include "solver.h"
 
+#define WRITE_SLICES 0
+
 static int write_pgm_slice(const char *path,
                            const float *data,
                            int rows,
@@ -68,8 +70,14 @@ static int write_pgm_volume(const char *prefix,
 {
     char path[512];
     const int n = rows * cols;
+    int s;
+    if (!WRITE_SLICES) {
+      s = slices - 1;
+    } else {
+      s = 0;
+    }
 
-    for (int s = 0; s < slices; s++) {
+    for (s; s < slices; s++) {
         if (slices == 1) {
             if (snprintf(path, sizeof(path), "%s.pgm", prefix) >= (int)sizeof(path))
                 return -1;
