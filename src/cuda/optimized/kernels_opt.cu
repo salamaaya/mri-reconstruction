@@ -6,6 +6,10 @@
 #define BLOCK_DIM_Y 32
 #define BLOCK_SIZE (BLOCK_DIM_X * BLOCK_DIM_Y)
 
+#define OPT_STRAT_SHARED   1
+#define OPT_STRAT_TEXTURED 2
+#define OPT_STRAT          OPT_STRAT_SHARED
+
 /* 
 * Forward NUFFT  (image → k-space samples)
 *
@@ -39,7 +43,13 @@ __global__ void nufft_forward_kernel(const Complex *img, int nx, int ny,
     for (int tile_start = 0; tile_start < total_pixels; tile_start += BLOCK_SIZE) {
         const int load_idx = tile_start + tid;
         if (load_idx < total_pixels) {
+#if OPT_STRAT == OPT_STRAT_SHARED
           sh_img[tid] = img[load_idx];
+#elif OPT_STRAT == OPT_STRAT_TEXTURED
+          sh_img[tid] = *reinterpret_cast<const Complex*>(
+              &__ldg(reinterpret_cast<const float2*>(&img[load_idx]))
+          );
+#endif
         } else {
           sh_img[tid] = { 0.0f, 0.0f };
         }
@@ -104,11 +114,19 @@ __global__ void nufft_adjoint_kernel(const Complex *samples, int m,
     for (int tile_start = 0; tile_start < m; tile_start += BLOCK_SIZE) {
         const int load_idx = tile_start + tid;
         if (load_idx < m) {
-            sh_samples[tid] = samples[load_idx];
-            sh_kx[tid]      = kx[load_idx];
-            sh_ky[tid]      = ky[load_idx];
+#if OPT_STRAT == OPT_STRAT_SHARED
+          sh_samples[tid] = samples[load_idx];
+          sh_kx[tid] = kx[load_idx];
+          sh_ky[tid] = ky[load_idx];
+#elif OPT_STRAT == OPT_STRAT_TEXTURED
+          sh_samples[tid] = *reinterpret_cast<const Complex*>(
+                &__ldg(reinterpret_cast<const float2*>(&samples[load_idx]))
+          );
+          sh_kx[tid] = __ldg(&kx[load_idx]);
+          sh_ky[tid] = __ldg(&ky[load_idx]);
+#endif
         } else {
-            sh_samples[tid] = Complex{0.0f, 0.0f};
+            sh_samples[tid] = {0.0f, 0.0f};
             sh_kx[tid]      = 0.0f;
             sh_ky[tid]      = 0.0f;
         }

@@ -54,20 +54,20 @@ cuda:
 	mkdir -p $(OUT_DIR)
 	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_cuda $(HDF5_LINK) -lm
 
-cuda_opt:
+cuda_opt_shared:
 	mkdir -p $(OUT_DIR)
 	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_OPT_SRCS) \
-	-o $(OUT_DIR)/mri_recon_cuda_opt $(HDF5_LINK) -lm
+	-o $(OUT_DIR)/mri_recon_cuda_opt_shared $(HDF5_LINK) -lm
+
+cuda_opt_textured:
+	mkdir -p $(OUT_DIR)
+	$(NVCC) $(NVFLAGS) $(COMMON_SRCS) $(CUDA_OPT_SRCS) \
+	-o $(OUT_DIR)/mri_recon_cuda_opt_textured $(HDF5_LINK) -lm -DOPT_STRAT=2
 
 debug_cpu:
 	mkdir -p $(OUT_DIR)
 	$(CC) $(CFLAGS_DBG) $(CPU_SRCS) -o $(OUT_DIR)/mri_recon_cpu_dbg $(HDF5_LINK) -lm
 
-debug_cuda:
-	mkdir -p $(OUT_DIR)
-	$(NVCC) $(NVFLAGS_DBG) $(COMMON_SRCS) $(CUDA_SRCS) -o $(OUT_DIR)/mri_recon_gpu_dbg \
-	    $(HDF5_LINK) -lm
-
 clean:
-	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_cuda $(OUT_DIR)/mri_recon_cuda_opt \
-	      $(OUT_DIR)/mri_recon_cpu_dbg $(OUT_DIR)/mri_recon_gpu_dbg
+	rm -f $(OUT_DIR)/mri_recon_cpu $(OUT_DIR)/mri_recon_cuda $(OUT_DIR)/mri_recon_cuda_opt_shared \
+	      $(OUT_DIR)/mri_recon_cuda_opt_textured $(OUT_DIR)/mri_recon_cp_dbg

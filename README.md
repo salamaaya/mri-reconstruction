@@ -83,6 +83,12 @@ make cuda
 # Optimized CUDA build
 make cuda_opt
 
+# Optimized CUDA build with shared memory
+make cuda_opt_shared
+
+# Optimized CUDA build with textured memory
+make cuda_opt_textured
+
 # All targets
 make all
 ```
@@ -97,6 +103,12 @@ make all
 
 # Run naive GPU reconstruction
 ./build/mri_recon_cuda [data/*.h5] [results/*]
+
+# Run optimized GPU reconstruction with shared memory
+./build/mri_recon_cuda_opt_shared [data/*.h5] [results/*]
+
+# Run optimized GPU reconstruction with textured memory
+./build/mri_recon_cuda_opt_textured [data/*.h5] [results/*]
 ```
 
 ---
