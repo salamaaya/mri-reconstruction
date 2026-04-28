@@ -1,6 +1,6 @@
 [x] time the major portions of the solver
 [x] optimize using shared memory
-[ ] optimize using constant memory
+[x] optimize using textured memory
 [x] setup experiment to test all different kinds of things
     and write the results nicely to an excel sheet or something
 [x] experiment with different data sizes
