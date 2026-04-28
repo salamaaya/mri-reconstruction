@@ -134,3 +134,4 @@ __global__ void nufft_adjoint_kernel(const Complex *samples, int m,
         img[y * nx + x].imaginary = norm * sum_i;
     }
 }
+

@@ -3,5 +3,4 @@
 [ ] optimize using constant memory
 [x] setup experiment to test all different kinds of things
     and write the results nicely to an excel sheet or something
-[ ] launch kernel within a kernel
 [x] experiment with different data sizes

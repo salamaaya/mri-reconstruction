@@ -41,7 +41,7 @@ void nufft_forward(const Complex *img, int nx, int ny,
             }
         }
 
-        samples[s].real = norm * sum_r;
+        samples[s].real      = norm * sum_r;
         samples[s].imaginary = norm * sum_i;
     }
 }
@@ -76,7 +76,7 @@ void nufft_adjoint(const Complex *samples, int m,
                 sum_i += v.real * sgn_sin + v.imaginary * c;
             }
 
-            img[img_index(y, x, nx)].real = norm * sum_r;
+            img[img_index(y, x, nx)].real      = norm * sum_r;
             img[img_index(y, x, nx)].imaginary = norm * sum_i;
         }
     }
